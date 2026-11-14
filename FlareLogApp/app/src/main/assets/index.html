@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Flare Log</title>
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#fff;color:#444;font-family:Roboto,"Segoe UI",Arial,sans-serif;font-size:14px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}
+#app{position:absolute;left:0;top:0;right:0;bottom:0;background:#fff}
+#hdr{position:absolute;left:0;top:0;right:0;height:56px;padding:0 16px;border-bottom:1px solid #eee;background:#fff}
+#hdr h1{float:left;margin:0;font-size:19px;font-weight:normal;color:#212121;line-height:56px}
+#hdr .btn{float:right;margin-top:10px}
+#main{position:absolute;left:0;right:0;top:56px;bottom:52px;overflow-y:auto;overflow-x:hidden}
+#nav{position:absolute;left:0;right:0;bottom:0;height:52px;border-top:1px solid #eee;background:#fff;display:flex}
+#nav button{flex:1;border:0;background:#fff;color:#9b9b9b;font-family:inherit;font-size:13px}
+#nav button.a{color:#387ed1;border-top:2px solid #387ed1}
+.btn{background:#387ed1;color:#fff;border:1px solid #387ed1;border-radius:4px;padding:9px 16px;font-family:inherit;font-size:14px;min-height:38px}
+.btn.ghost{background:#fff;color:#387ed1}
+.btn.red{background:#fff;color:#df514c;border-color:#df514c}
+.stats{border-bottom:1px solid #eee;overflow:hidden}
+.stat{float:left;width:33.33%;padding:14px 16px;border-left:1px solid #eee}
+.stat.first{border-left:0}
+.stat small{display:block;color:#9b9b9b;font-size:11px;text-transform:uppercase}
+.stat b{font-size:20px;font-weight:normal;color:#212121}
+.stat b i{font-style:normal;font-size:12px;color:#9b9b9b;margin-left:2px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #eee}
+.row:active{background:#fafafa}
+.row .t{color:#212121;font-size:15px}
+.row .s{color:#9b9b9b;font-size:12px;margin-top:2px}
+.row .r{text-align:right;padding-left:10px;flex-shrink:0}
+.row .d{font-size:16px;color:#212121}
+.tag{font-size:10px;padding:1px 5px;border-radius:2px;margin-left:6px;background:#ffeee8;color:#ff5722}
+.ok{color:#4caf50!important}
+.no{color:#9b9b9b}
+.gap{padding:6px 16px;background:#f5f7fa;color:#9b9b9b;font-size:11px;border-bottom:1px solid #eee;text-align:center}
+.gap b{color:#387ed1;font-weight:normal}
+.empty{padding:60px 24px;text-align:center;color:#9b9b9b}
+h3{margin:0;padding:16px 16px 8px;font-size:11px;font-weight:normal;color:#9b9b9b;text-transform:uppercase}
+.kv{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee}
+.kv b{font-weight:normal;color:#212121}
+.bar{padding:10px 16px;border-bottom:1px solid #eee}
+.bar .l{display:flex;justify-content:space-between;margin-bottom:5px;color:#212121}
+.bar .tr{height:4px;background:#f5f7fa;border-radius:2px}
+.bar .tr i{display:block;height:4px;background:#387ed1;border-radius:2px}
+.more{padding:16px}
+.more .btn{display:block;width:100%;margin-bottom:10px;padding:12px}
+.note{color:#9b9b9b;font-size:12px;padding:0 16px 16px;word-wrap:break-word}
+#ov{position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:none;z-index:9}
+#ov.o{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:94%;overflow-y:auto;background:#fff;padding:18px 16px;border-radius:10px 10px 0 0}
+.sheet h2{margin:0 0 6px;font-size:17px;font-weight:normal;color:#212121}
+label{display:block;margin:14px 0 6px;font-size:11px;color:#9b9b9b;text-transform:uppercase}
+input.txt,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;background:#fff;color:#212121;font-family:inherit;font-size:16px}
+textarea{resize:none;height:64px}
+.seg{display:flex;border:1px solid #ddd;border-radius:4px;overflow:hidden}
+.seg button{flex:1 1 0px;padding:11px 4px;background:#fff;border:0;color:#9b9b9b;font-family:inherit;font-size:15px}
+.seg button.a{background:#387ed1;color:#fff}
+.seg button.a.g{background:#4caf50}
+.seg button.a.n{background:#9b9b9b}
+.chips{margin-top:6px}
+.chip{display:inline-block;background:#f5f7fa;border:1px solid #eee;border-radius:16px;padding:4px 6px 4px 12px;margin:4px 6px 0 0;font-size:13px;color:#212121}
+.chip u{text-decoration:none;color:#9b9b9b;margin-left:6px;padding:0 6px;font-size:16px}
+.durline{margin-top:14px;padding:10px 12px;background:#f5f7fa;border-radius:4px;color:#212121;font-size:14px}
+.durline span{color:#9b9b9b}
+input[type=range]{width:100%}
+.err{color:#df514c;font-size:13px;margin-top:10px;min-height:16px}
+.acts{margin-top:10px;overflow:hidden;padding-bottom:6px}
+.acts .btn{float:right;margin-left:8px;padding:11px 18px}
+.acts .btn.red{float:left;margin-left:0}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr"><h1 id="ttl">Flares</h1><button class="btn" onclick="openForm()">+ New flare</button></div>
+  <div id="main"></div>
+  <div id="nav">
+    <button id="n_flares" onclick="tab('flares')">Flares</button>
+    <button id="n_insights" onclick="tab('insights')">Insights</button>
+    <button id="n_data" onclick="tab('data')">Backup</button>
+  </div>
+</div>
+
+<div id="ov">
+  <div class="sheet">
+    <h2 id="fh">Log flare</h2>
+    <label>Started</label><input class="txt" type="date" id="fs" oninput="updDur()" onchange="updDur()" />
+    <label>Status</label>
+    <div class="seg" id="fst"></div>
+    <div id="endw"><label>Ended</label><input class="txt" type="date" id="fe" oninput="updDur()" onchange="updDur()" /></div>
+    <div class="durline" id="durline"></div>
+
+    <label>Had M?</label>
+    <div class="seg" id="fmq"></div>
+    <div id="mw"><label>M level (1-10)</label><select id="fm" onchange="F.m=+this.value"></select></div>
+
+    <label>Had S?</label>
+    <div class="seg" id="fsq"></div>
+    <div id="sw"><label>S level (1-10)</label><select id="fsv" onchange="F.s=+this.value"></select></div>
+
+    <label>Finger / toe</label>
+    <select id="fj" onchange="addJoint(this.value);this.selectedIndex=0;"></select>
+    <div class="chips" id="chips"></div>
+    <label>Took Zerodol-SP?</label>
+    <div class="seg" id="fz"></div>
+    <div id="dosew"><label>Tablets taken for this flare</label><div class="seg" id="fd"></div></div>
+    <label>Pain <span id="pv" style="color:#212121">5</span>/10</label>
+    <input type="range" id="fp" min="0" max="10" value="5" oninput="$('pv').innerHTML=this.value" onchange="$('pv').innerHTML=this.value" />
+    <label>Notes (optional)</label><textarea id="fn"></textarea>
+    <div class="err" id="err"></div>
+    <div class="acts">
+      <button class="btn" onclick="saveFlare()">Save</button>
+      <button class="btn ghost" onclick="closeForm()">Cancel</button>
+      <button class="btn red" id="fdel" onclick="delFlare()" style="display:none">Delete</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="imp" accept=".json,application/json" style="position:absolute;left:-9999px;top:0;width:1px" onchange="importJSON()" />
+
+<script>
+var KEY = 'flarelog.v1';
+var HANDS = ['Thumb', 'Index', 'Middle', 'Ring', 'Little'];
+var TOES = ['Big toe', '2nd toe', '3rd toe', '4th toe', 'Little toe'];
+var GROUPS = [['Left hand', HANDS], ['Right hand', HANDS], ['Left foot', TOES], ['Right foot', TOES]];
+var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var DOT = '·', EN = '–', TICK = '✓', UP = '↑', TIMES = '×', BOM = '﻿';
+var SEP = ' ' + DOT + ' ';
+
+function $(id) { return document.getElementById(id); }
+function isArr(x) { return Object.prototype.toString.call(x) === '[object Array]'; }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function today() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function ymd(s) { var p = s.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+function diff(a, b) { return Math.round((ymd(b) - ymd(a)) / 864e5); }
+function validDate(s) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  var p = s.split('-'), y = +p[0], m = +p[1], d = +p[2], t = new Date(Date.UTC(y, m - 1, d));
+  return t.getUTCFullYear() === y && t.getUTCMonth() === m - 1 && t.getUTCDate() === d;
+}
+function fmt(s, withYear) { var p = s.split('-'); return (+p[2]) + ' ' + MON[+p[1] - 1] + (withYear ? ' ' + p[0] : ''); }
+function esc(s) {
+  var m = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
+  return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return m[c]; });
+}
+function dur(f) { return diff(f.start, f.end || today()) + 1; }
+function short(j) { return j.replace('Left hand', 'L hand').replace('Right hand', 'R hand').replace('Left foot', 'L foot').replace('Right foot', 'R foot'); }
+function avg(a) { if (!a.length) return null; var t = 0, i; for (i = 0; i < a.length; i++) t += a[i]; return t / a.length; }
+function r1(n) { return n == null ? '-' : String(Math.round(n * 10) / 10); }
+function sortedAsc() { return flares.slice().sort(function (a, b) { return a.start < b.start ? -1 : (a.start > b.start ? 1 : 0); }); }
+function hasJoint(arr, j) { var i; for (i = 0; i < arr.length; i++) if (arr[i] === j) return true; return false; }
+
+/* ---------- storage (inside the app, via localStorage) ---------- */
+function parseData(txt) {
+  if (txt.charAt(0) === BOM) txt = txt.substring(1);
+  var d = JSON.parse(txt), i;
+  if (!isArr(d)) throw new Error('bad');
+  for (i = 0; i < d.length; i++) if (!d[i].start || !isArr(d[i].joints)) throw new Error('bad');
+  return d;
+}
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(flares)); } catch (e) { alert('Could not save data.'); }
+}
+
+var flares = load(), curTab = 'flares', F = null;
+
+/* ---------- calculations ---------- */
+function gaps() {
+  var s = sortedAsc(), m = {}, i;
+  for (i = 1; i < s.length; i++) {
+    if (s[i - 1].end) m[s[i].id] = Math.max(0, diff(s[i - 1].end, s[i].start));
+  }
+  return m;
+}
+function values(o) { var a = [], k; for (k in o) if (o.hasOwnProperty(k)) a.push(o[k]); return a; }
+function minOf(a) { return Math.min.apply(null, a); }
+function maxOf(a) { return Math.max.apply(null, a); }
+function doseText(d) {
+  var m = { '0.5': '1/2', '1': '1', '1.5': '1 1/2', '2': '2' };
+  return (d != null && m[String(d)]) ? ' ' + m[String(d)] + (d > 1 ? ' tabs' : ' tab') : '';
+}
+
+/* ---------- views ---------- */
+function tab(t) { curTab = t; render(); }
+function render() {
+  var ids = ['flares', 'insights', 'data'], i;
+  for (i = 0; i < ids.length; i++) $('n_' + ids[i]).className = (ids[i] === curTab ? 'a' : '');
+  $('ttl').innerHTML = { flares: 'Flares', insights: 'Insights', data: 'Backup' }[curTab];
+  $('main').innerHTML = (curTab === 'flares' ? vFlares() : curTab === 'insights' ? vInsights() : vData());
+}
+
+function vFlares() {
+  if (!flares.length) return '<div class="empty">No flares logged yet.<br />Tap <b>+ New flare</b> to add one.</div>';
+  var G = gaps(), list = sortedAsc().reverse(), last = list[0], gv = values(G), h = '', i;
+  h += '<div class="stats">' +
+    '<div class="stat first"><small>' + (last.end ? 'Since last' : 'Ongoing') + '</small><b>' + (last.end ? diff(last.end, today()) : dur(last)) + '<i>d</i></b></div>' +
+    '<div class="stat"><small>Avg gap</small><b>' + r1(avg(gv)) + '<i>d</i></b></div>' +
+    '<div class="stat"><small>Flares</small><b>' + flares.length + '</b></div></div>';
+  for (i = 0; i < list.length; i++) {
+    var f = list[i], js = [], k;
+    for (k = 0; k < f.joints.length; k++) js.push(short(f.joints[k]));
+    var title = esc(js[0]) + (js.length > 1 ? ' <span class="no">+' + (js.length - 1) + '</span>' : '');
+    var range = f.end ? (f.end === f.start ? fmt(f.start, 1) : fmt(f.start) + ' ' + EN + ' ' + fmt(f.end, 1)) : fmt(f.start, 1) + ' ' + EN + ' now';
+    var extra = (f.pain != null ? SEP + 'pain ' + f.pain + '/10' : '') + (f.m != null ? SEP + 'M ' + f.m : '') + (f.s != null ? SEP + 'S ' + f.s : '');
+    h += '<div class="row" onclick="openForm(\'' + f.id + '\')"><div><div class="t">' + title + (f.end ? '' : '<span class="tag">ONGOING</span>') +
+      '</div><div class="s">' + range + extra + '</div></div>' +
+      '<div class="r"><div class="d">' + dur(f) + 'd</div><div class="s ' + (f.zerodol ? 'ok' : 'no') + '">' + (f.zerodol ? 'Zerodol-SP' + doseText(f.dose) + ' ' + TICK : 'No Zerodol') + '</div></div></div>';
+    if (G[f.id] != null) h += '<div class="gap">' + UP + ' <b>' + G[f.id] + ' days</b> flare-free before this flare</div>';
+  }
+  return h;
+}
+
+function kv(k, v) { return '<div class="kv"><span>' + k + '</span><b>' + v + '</b></div>'; }
+function vInsights() {
+  if (!flares.length) return '<div class="empty">Log a few flares to see insights.</div>';
+  var G = gaps(), gv = values(G), d = [], zd = [], nz = [], mv = [], sv = [], z = 0, i, f;
+  for (i = 0; i < flares.length; i++) {
+    f = flares[i]; d.push(dur(f));
+    if (f.zerodol) { z++; zd.push(dur(f)); } else nz.push(dur(f));
+    if (f.m != null) mv.push(f.m);
+    if (f.s != null) sv.push(f.s);
+  }
+  var h = '<h3>Gap between flares</h3>' + kv('Average', r1(avg(gv)) + ' days') +
+    kv('Longest', gv.length ? maxOf(gv) + ' days' : '-') + kv('Shortest', gv.length ? minOf(gv) + ' days' : '-') +
+    '<h3>Duration</h3>' + kv('Average', r1(avg(d)) + ' days') + kv('Longest', maxOf(d) + ' days') + kv('Shortest', minOf(d) + ' days') +
+    '<h3>M and S</h3>' + kv('Had M', mv.length + ' of ' + flares.length + ' flares' + (mv.length ? ' (avg ' + r1(avg(mv)) + ')' : '')) +
+    kv('Had S', sv.length + ' of ' + flares.length + ' flares' + (sv.length ? ' (avg ' + r1(avg(sv)) + ')' : '')) +
+    '<h3>Zerodol-SP</h3>' + kv('Taken in', z + ' of ' + flares.length + ' flares (' + Math.round(z / flares.length * 100) + '%)');
+  if (zd.length && nz.length) h += kv('Avg length with', r1(avg(zd)) + ' days') + kv('Avg length without', r1(avg(nz)) + ' days');
+  var c = {}, e = [], j, k;
+  for (i = 0; i < flares.length; i++) for (j = 0; j < flares[i].joints.length; j++) { k = flares[i].joints[j]; c[k] = (c[k] || 0) + 1; }
+  for (k in c) if (c.hasOwnProperty(k)) e.push([k, c[k]]);
+  e.sort(function (a, b) { return b[1] - a[1]; });
+  h += '<h3>Most affected</h3>';
+  for (i = 0; i < e.length; i++) {
+    h += '<div class="bar"><div class="l"><span>' + esc(short(e[i][0])) + '</span><span class="no">' + e[i][1] + '</span></div><div class="tr"><i style="width:' + Math.round(e[i][1] / e[0][1] * 100) + '%"></i></div></div>';
+  }
+  return h;
+}
+
+function vData() {
+  return '<div class="more"><button class="btn" onclick="exportJSON()">Export backup (JSON)</button>' +
+    '<button class="btn ghost" onclick="exportCSV()">Export CSV (for Excel)</button>' +
+    '<button class="btn ghost" onclick="$(\'imp\').click()">Import backup</button>' +
+    '<button class="btn red" onclick="clearAll()">Delete all data</button></div>' +
+    '<div class="note">Your data is stored on this phone, inside the app. Uninstalling the app deletes it, so export a backup now and then. Exports are saved in your Downloads folder. To move to another phone, export here and import there.</div>';
+}
+
+/* ---------- form ---------- */
+function yesNo(id, val, fnName) {
+  $(id).innerHTML = '<button class="' + (val ? 'a g' : '') + '" onclick="' + fnName + '(true)">Yes</button><button class="' + (val ? '' : 'a n') + '" onclick="' + fnName + '(false)">No</button>';
+}
+function paint() {
+  $('fst').innerHTML = '<button class="' + (F.ongoing ? 'a' : '') + '" onclick="setOngoing(true)">Ongoing</button><button class="' + (F.ongoing ? '' : 'a') + '" onclick="setOngoing(false)">Ended</button>';
+  yesNo('fz', F.zerodol, 'setZ');
+  yesNo('fmq', F.m != null, 'setM');
+  yesNo('fsq', F.s != null, 'setS');
+  $('endw').style.display = F.ongoing ? 'none' : 'block';
+  $('dosew').style.display = F.zerodol ? 'block' : 'none';
+  $('mw').style.display = F.m != null ? 'block' : 'none';
+  $('sw').style.display = F.s != null ? 'block' : 'none';
+  if (F.m != null) $('fm').value = String(F.m);
+  if (F.s != null) $('fsv').value = String(F.s);
+  var ds = [[0.5, '1/2'], [1, '1'], [1.5, '1 1/2'], [2, '2']], dh = '', k;
+  for (k = 0; k < ds.length; k++) dh += '<button class="' + (F.dose === ds[k][0] ? 'a g' : '') + '" onclick="setDose(' + ds[k][0] + ')">' + ds[k][1] + '</button>';
+  $('fd').innerHTML = dh;
+  var h = '', i;
+  for (i = 0; i < F.joints.length; i++) h += '<span class="chip">' + esc(F.joints[i]) + '<u onclick="rmJoint(' + i + ')">' + TIMES + '</u></span>';
+  $('chips').innerHTML = h;
+  updDur();
+}
+function updDur() {
+  if (!F) return;
+  var s = $('fs').value, e = F.ongoing ? today() : $('fe').value, t = '';
+  if (validDate(s) && validDate(e) && e >= s) {
+    var n = diff(s, e) + 1;
+    t = '<span>Duration:</span> ' + n + (n === 1 ? ' day' : ' days') + (F.ongoing ? ' <span>(so far)</span>' : '');
+  } else {
+    t = '<span>Duration:</span> -';
+  }
+  $('durline').innerHTML = t;
+}
+function setOngoing(v) { F.ongoing = v; paint(); }
+function setZ(v) { F.zerodol = v; F.dose = v ? (F.dose || 1) : null; paint(); }
+function setDose(d) { F.dose = d; paint(); }
+function setM(v) { F.m = v ? (F.m || 1) : null; paint(); }
+function setS(v) { F.s = v ? (F.s || 1) : null; paint(); }
+function addJoint(j) { if (j && !hasJoint(F.joints, j)) { F.joints.push(j); paint(); } }
+function rmJoint(i) { F.joints.splice(i, 1); paint(); }
+function findFlare(id) { var i; for (i = 0; i < flares.length; i++) if (flares[i].id === id) return i; return -1; }
+
+function levelOptions() {
+  var o = '', i;
+  for (i = 1; i <= 10; i++) o += '<option value="' + i + '">' + i + '</option>';
+  return o;
+}
+
+function openForm(id) {
+  var idx = id ? findFlare(id) : -1, ex = idx >= 0 ? flares[idx] : null, g, n, o = '<option value="">Select finger / toe...</option>';
+  F = ex ? { id: ex.id, start: ex.start, end: ex.end || '', ongoing: !ex.end, joints: ex.joints.slice(), zerodol: !!ex.zerodol, dose: ex.zerodol ? (ex.dose || 1) : null, pain: ex.pain == null ? 5 : ex.pain, notes: ex.notes || '', m: ex.m == null ? null : ex.m, s: ex.s == null ? null : ex.s }
+         : { id: null, start: today(), end: '', ongoing: true, joints: [], zerodol: false, dose: null, pain: 5, notes: '', m: null, s: null };
+  $('fh').innerHTML = ex ? 'Edit flare' : 'Log flare';
+  $('fs').value = F.start; $('fe').value = F.end || today(); $('fp').value = F.pain; $('pv').innerHTML = F.pain; $('fn').value = F.notes;
+  $('fm').innerHTML = levelOptions();
+  $('fsv').innerHTML = levelOptions();
+  for (g = 0; g < GROUPS.length; g++) {
+    o += '<optgroup label="' + GROUPS[g][0] + '">';
+    for (n = 0; n < GROUPS[g][1].length; n++) o += '<option>' + GROUPS[g][0] + SEP + GROUPS[g][1][n] + '</option>';
+    o += '</optgroup>';
+  }
+  $('fj').innerHTML = o;
+  $('fdel').style.display = ex ? 'block' : 'none';
+  $('err').innerHTML = '';
+  paint();
+  $('ov').className = 'o';
+}
+function closeForm() { $('ov').className = ''; }
+function saveFlare() {
+  var s = $('fs').value.replace(/^\s+|\s+$/g, ''), e = F.ongoing ? '' : $('fe').value.replace(/^\s+|\s+$/g, '');
+  if (!validDate(s)) { $('err').innerHTML = 'Choose a start date.'; return; }
+  if (!F.ongoing) {
+    if (!validDate(e)) { $('err').innerHTML = 'Choose an end date.'; return; }
+    if (e < s) { $('err').innerHTML = 'End date must be on or after the start date.'; return; }
+  }
+  if (!F.joints.length) { $('err').innerHTML = 'Select at least one finger or toe.'; return; }
+  var rec = { id: F.id || ('f' + new Date().getTime()), start: s, end: e || null, joints: F.joints, zerodol: F.zerodol, dose: F.zerodol ? F.dose : null, pain: +$('fp').value, notes: $('fn').value.replace(/^\s+|\s+$/g, ''), m: F.m, s: F.s };
+  var i = findFlare(rec.id);
+  if (i >= 0) flares[i] = rec; else flares.push(rec);
+  save(); closeForm(); render();
+}
+function delFlare() {
+  if (!confirm('Delete this flare?')) return;
+  var i = findFlare(F.id);
+  if (i >= 0) flares.splice(i, 1);
+  save(); closeForm(); render();
+}
+
+/* called by the Android back button; returns true if it handled the press */
+function handleBack() {
+  if ($('ov').className === 'o') { closeForm(); return true; }
+  if (curTab !== 'flares') { tab('flares'); return true; }
+  return false;
+}
+
+/* ---------- backup ---------- */
+function exportFile(name, mime, text) {
+  if (window.Android && Android.saveFile) { Android.saveFile(name, mime, text); }
+  else { alert('Saving files is only available inside the Android app.'); }
+}
+function exportJSON() { exportFile('flare-log-' + today() + '.json', 'application/json', JSON.stringify(flares, null, 2)); }
+function exportCSV() {
+  function q(s) { return '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"'; }
+  var rows = ['start,end,days,joints,m,s,zerodol_sp,zerodol_tablets,pain,notes'], s = sortedAsc(), i, f;
+  for (i = 0; i < s.length; i++) {
+    f = s[i];
+    rows.push([q(f.start), q(f.end || 'ongoing'), dur(f), q(f.joints.join('; ')), f.m == null ? '' : f.m, f.s == null ? '' : f.s, f.zerodol ? 'yes' : 'no', (f.zerodol && f.dose) ? q(doseText(f.dose).replace(/^ /, '').replace(/ tabs?$/, '')) : '', f.pain == null ? '' : f.pain, q(f.notes)].join(','));
+  }
+  exportFile('flare-log-' + today() + '.csv', 'text/csv', '﻿' + rows.join('\r\n'));
+}
+function importJSON() {
+  var inp = $('imp'), file = inp.files && inp.files[0];
+  if (!file) return;
+  var rd = new FileReader();
+  rd.onload = function () {
+    var d = null;
+    try { d = parseData(String(rd.result)); } catch (e) { d = null; }
+    inp.value = '';
+    if (!d) { alert('That file is not a valid backup.'); return; }
+    if (!confirm('Replace current data with ' + d.length + ' flares from this backup?')) return;
+    flares = d; save(); render();
+  };
+  rd.onerror = function () { inp.value = ''; alert('Could not read that file.'); };
+  rd.readAsText(file);
+}
+function clearAll() {
+  if (confirm('Delete ALL flare data? This cannot be undone.')) { flares = []; save(); render(); }
+}
+
+render();
+</script>
+</body>
+</html>
